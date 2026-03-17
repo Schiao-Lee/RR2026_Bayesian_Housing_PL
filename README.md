@@ -64,3 +64,12 @@ To ensure the highest standards of code quality and reproducibility, this reposi
 * **Peer Review:** Every PR requires at least one approval from another team member before it can be merged.
 * **No Force Pushing:** Force pushing (`git push -f`) and history deletion are disabled to preserve the complete commit history for auditing by the course instructor.
 * **Environment as Code:** All dependencies are strictly version-controlled via `environment.yml`. We use `conda` instead of `venv` to ensure stable compilation of underlying C++/Fortran libraries required for Bayesian inference (e.g., PyMC).
+
+## 2. Automated Data Acquisition
+
+Ensure you have your Kaggle API credentials (`kaggle.json`) configured.  
+Run the following command to automatically download, unzip, and merge the monthly datasets:
+
+```bash
+python src/data_prep/01_download_and_merge.py
+
