@@ -29,14 +29,13 @@ FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── 1. Data Loading ────────────────────────────────────────────────────────
 
-def load_data(path: Path) -> pd.DataFrame:
+def load_data(path: Path) -> tuple[pd.DataFrame, list[str]]:
     df = pd.read_csv(path)
-    months_sorted = sorted(df['snapshot_month'].unique())
+    months_sorted = sorted(df['snapshot_month'].unique().tolist())
     df['snapshot_month'] = pd.Categorical(
         df['snapshot_month'], categories=months_sorted, ordered=True
     )
     return df, months_sorted
-
 
 # ── 2. Missing Values ──────────────────────────────────────────────────────
 
@@ -110,7 +109,7 @@ def plot_price_distribution(df: pd.DataFrame) -> None:
 
 # ── 4. City-level Analysis ─────────────────────────────────────────────────
 
-def plot_city_analysis(df: pd.DataFrame) -> list:
+def plot_city_analysis(df: pd.DataFrame) -> list[str]:
     city_order = (
         df.groupby('city')['price'].median()
           .sort_values(ascending=False).index.tolist()
@@ -141,7 +140,7 @@ def plot_city_analysis(df: pd.DataFrame) -> list:
 
     fig, ax = plt.subplots(figsize=(11, 4))
     counts = df['city'].value_counts().reindex(city_order)
-    ax.bar(counts.index, counts.values, color=sns.color_palette('muted')[2])
+    ax.bar(counts.index.tolist(), counts.to_numpy(), color=sns.color_palette('muted')[2])
     ax.set_title('Number of Listings per City')
     ax.set_ylabel('Count')
     plt.xticks(rotation=35, ha='right')
@@ -154,12 +153,15 @@ def plot_city_analysis(df: pd.DataFrame) -> list:
 
 # ── 5. Temporal Analysis ───────────────────────────────────────────────────
 
-def plot_temporal_analysis(df: pd.DataFrame, city_order: list) -> None:
+def plot_temporal_analysis(df: pd.DataFrame, city_order: list[str]) -> None:
     monthly_counts = df.groupby('snapshot_month', observed=True).size()
 
     fig, ax = plt.subplots(figsize=(11, 4))
-    ax.bar(monthly_counts.index.astype(str), monthly_counts.values,
-           color=sns.color_palette('muted')[3])
+    ax.bar(
+    monthly_counts.index.astype(str).tolist(),
+    monthly_counts.to_numpy(),
+    color=sns.color_palette('muted')[3]
+)
     ax.set_title('Number of Listings per Month')
     ax.set_ylabel('Count')
     ax.set_xlabel('Month')
@@ -171,8 +173,12 @@ def plot_temporal_analysis(df: pd.DataFrame, city_order: list) -> None:
     monthly_price = df.groupby('snapshot_month', observed=True)['price'].median()
 
     fig, ax = plt.subplots(figsize=(11, 4))
-    ax.plot(monthly_price.index.astype(str), monthly_price.values,
-            marker='o', linewidth=2)
+    ax.plot(
+    monthly_price.index.astype(str).tolist(),
+    monthly_price.to_numpy(),
+    marker='o',
+    linewidth=2
+)
     ax.set_title('National Median Price over Time')
     ax.set_ylabel('Median Price (PLN)')
     ax.yaxis.set_major_formatter(
@@ -330,7 +336,7 @@ def print_prior_reference(df: pd.DataFrame) -> None:
 
 # ── Main ───────────────────────────────────────────────────────────────────
 
-def main():
+def main() -> None:
     print(f'Loading data from: {DATA_PATH}')
     df, months_sorted = load_data(DATA_PATH)
     print(f'Shape  : {df.shape[0]:,} rows × {df.shape[1]} columns')
