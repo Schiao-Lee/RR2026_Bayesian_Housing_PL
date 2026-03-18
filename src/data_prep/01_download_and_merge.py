@@ -29,7 +29,6 @@ def main():
     api = KaggleApi()
     api.authenticate()
 
-    # Dataset name matches the source documented in README.md
     dataset_name = "krzysztofjamroz/apartment-prices-in-poland"
 
     print(f"⬇️ Downloading dataset '{dataset_name}' to {raw_data_dir}...")
