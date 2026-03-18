@@ -12,7 +12,7 @@
 | Levente Laszlo Szabo | 488761 | **Role name:** | [@LeventeSzaboUW](https://github.com/LeventeSzaboUW) |
 | Loveness Tafadzwa Mudyiwa | 478559 | **Role name:** | [@username](https://github.com/) |
 | Xiao Li | 473533 | **Role name:** | [@Schiao-Lee](https://github.com/Schiao-Lee) |
-| Szymon Grabowski | 473037 | **Role name:** | [@sgrabowski8]((https://github.com/sgrabowski8)) |
+| Szymon Grabowski | 473037 | **Role name:** | [@sgrabowski8](https://github.com/sgrabowski8) |
 
 ---
 
