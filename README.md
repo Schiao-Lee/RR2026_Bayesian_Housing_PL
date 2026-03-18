@@ -1,7 +1,7 @@
-# Reproducible Bayesian Hierarchical Analysis of Apartment Prices in Poland 🇵🇱
+# Reproducible Bayesian Hierarchical Time-Varying Analysis of Apartment Prices in Poland 🇵🇱
 
-**Course:** Reproducible Research UW - 2026  
-**Instructor:** dr Jakub Michańków  
+**Courses:**  
+- Reproducible Research UW - 2026 (dr Jakub Michańków)   
 
 ---
 
@@ -12,35 +12,78 @@
 | Levente Laszlo Szabo | 488761 | **Role name:** | [@LeventeSzaboUW](https://github.com/LeventeSzaboUW) |
 | Loveness Tafadzwa Mudyiwa | 478559 | **Role name:** | [@username](https://github.com/) |
 | Xiao Li | 473533 | **Role name:** | [@Schiao-Lee](https://github.com/Schiao-Lee) |
-| Szymon Grabowski | 473037 | **Role name:** | [@username](https://github.com/) |
+| Szymon Grabowski | 473037 | **Role name:** | [@sgrabowski8]((https://github.com/sgrabowski8)) |
 
 ---
 
 ##  Project Overview
 
-This project aims to identify the key determinants of real estate prices across the 15 largest Polish cities (Warsaw, Krakow, Wroclaw, etc.). Because real estate data naturally possesses a nested structure (apartments are grouped within cities), applying traditional linear regression may lead to either underfitting (complete pooling) or overfitting (no pooling).
+This project aims to identify the key determinants of real estate prices across the 15 largest Polish cities (Warsaw, Krakow, Wroclaw, etc.) **and to track how these determinants evolve over time**. Because real estate data naturally possesses a nested structure (apartments are grouped within cities) and a temporal dimension (monthly snapshots from August 2023 to June 2024), applying traditional linear regression may lead to either underfitting (complete pooling) or overfitting (no pooling), while also failing to capture the dynamics of a changing housing market.
 
-To address this, we implement a **Bayesian Hierarchical Model (BHM)** using partial pooling. This approach allows each city to have its own baseline price (random intercepts) and specific price decay rates based on distance to the city center (random slopes), while still sharing statistical strength across the entire national dataset.
+To address this, we implement a **Bayesian Hierarchical Time-Varying Parameters (TVP) Model** using partial pooling and state-space formulations. This approach allows each city to have its own baseline price and price-sensitivity coefficients that **evolve over time as random walks**, while still sharing statistical strength across the entire national dataset. By combining the hierarchical structure with time-varying dynamics, the model simultaneously serves two purposes:
+
+1. **Reproducible Research:** A fully automated, end-to-end reproducible pipeline — from data acquisition to posterior inference — meeting strict reproducibility standards.
+2. **Bayesian Time-Series Econometrics:** A state-space / TVP model estimated via MCMC, directly aligned with the course syllabus (TVP, state-space models, Markov Chain Monte Carlo).
 
 ### Mathematical Formulation
 
-At the core of our hierarchical model:
+#### Observation Equation
 
-$$Price_i \sim \text{Normal}(\mu_i, \sigma)$$
+At each time period $t$ and for each apartment $i$ in city $c$:
 
-$$\mu_i = \alpha_{city[i]} + \beta_{city[i]} \cdot centreDistance_i + \gamma \cdot squareMeters_i + \dots$$
+$$Price_{i,c,t} \sim \text{Normal}(\mu_{i,c,t},\ \sigma^2)$$
+
+$$\mu_{i,c,t} = \alpha_{c,t} + \beta_{c,t} \cdot centreDistance_{i} + \gamma_t \cdot squareMeters_{i} + \dots$$
 
 Where:
-- $\alpha_{city[i]}$ represents the varying baseline price for each city.
-- $\beta_{city[i]}$ represents the varying effect of the distance to the city center for each city.
+- $\alpha_{c,t}$ is the **time-varying** baseline price for city $c$ at month $t$.
+- $\beta_{c,t}$ is the **time-varying** effect of distance to city center for city $c$ at month $t$.
+- $\gamma_t$ is the (optionally time-varying) effect of apartment size.
+
+#### Transition Equations (State Evolution)
+
+The key time-series component: city-level parameters follow **random walk** processes, capturing the gradual evolution of the housing market:
+
+$$\alpha_{c,t} = \alpha_{c,t-1} + \eta_{c,t}^{\alpha}, \quad \eta_{c,t}^{\alpha} \sim \text{Normal}(0,\ \sigma_{\alpha}^2)$$
+
+$$\beta_{c,t} = \beta_{c,t-1} + \eta_{c,t}^{\beta}, \quad \eta_{c,t}^{\beta} \sim \text{Normal}(0,\ \sigma_{\beta}^2)$$
+
+#### Hierarchical Priors
+
+The initial states are drawn from city-group-level distributions (partial pooling):
+
+$$\alpha_{c,0} \sim \text{Normal}(\bar{\alpha},\ \tau_{\alpha}^2)$$
+
+$$\beta_{c,0} \sim \text{Normal}(\bar{\beta},\ \tau_{\beta}^2)$$
+
+Hyperpriors:
+
+$$\bar{\alpha} \sim \text{Normal}(0,\ 10^2), \quad \tau_{\alpha} \sim \text{HalfNormal}(s_{\alpha})$$
+
+$$\sigma_{\alpha},\ \sigma_{\beta} \sim \text{HalfNormal}(s)$$
+
+This structure forms a **state-space model**: the observation equation links observed prices to latent time-varying parameters, and the transition equations govern how those parameters evolve — a canonical framework in Bayesian time-series econometrics.
+
+### Modeling Strategy
+
+We adopt a progressive modeling approach for comparison and validation:
+
+| Stage | Model | Purpose |
+| :--- | :--- | :--- |
+| 1 | Pooled Bayesian Linear Regression | Baseline — ignores city and time structure |
+| 2 | Bayesian Hierarchical Model (BHM) | Adds city-level partial pooling (random intercepts & slopes) |
+| 3 | Bayesian Hierarchical TVP Model | Full model — adds time-varying parameters via state-space |
+
+Model comparison will be conducted using **WAIC / LOO-CV** (via ArviZ), allowing us to quantify the empirical gain from incorporating temporal dynamics.
 
 ---
 
 ##  Dataset Information
 
 - **Source:** [Apartment Prices in Poland (Kaggle)](https://www.kaggle.com/datasets/mlenkin/apartment-prices-in-poland)
-- **Time Span:** August 2023 – June 2024 (Monthly snapshots)
+- **Time Span:** August 2023 – June 2024 (11 monthly snapshots, providing $T = 11$ time periods)
 - **Key Features:** `city`, `squareMeters`, `buildYear`, `centreDistance`, `poiCount` (OpenStreetMap POI data)
+- **Temporal Structure:** Each monthly CSV is treated as a cross-sectional snapshot at time $t$, enabling the construction of a panel dataset indexed by $(city, month)$.
 - **Reproducibility Note:** We **do not** store raw CSV files in this repository. All data is fetched programmatically via the Kaggle API to ensure a fully automated and reproducible data pipeline.
 
 ---
@@ -78,3 +121,32 @@ Ensure you have your Kaggle API credentials (`kaggle.json`) configured. Run the 
 ```bash
 python src/data_prep/01_download_and_merge.py
 ```
+
+### 3. Model Estimation
+
+```bash
+# Stage 1: Pooled baseline
+python src/models/01_pooled_baseline.py
+
+# Stage 2: Hierarchical BHM (partial pooling, no time dynamics)
+python src/models/02_hierarchical_bhm.py
+
+# Stage 3: Hierarchical TVP (full time-varying model)
+python src/models/03_hierarchical_tvp.py
+```
+
+### 4. Model Comparison & Diagnostics
+
+```bash
+# WAIC / LOO-CV comparison, trace plots, posterior summaries
+python src/analysis/model_comparison.py
+```
+
+---
+
+##  Expected Outputs
+
+- **Posterior summaries** of time-varying intercepts $\alpha_{c,t}$ and slopes $\beta_{c,t}$ for each city and month.
+- **Trace plots and convergence diagnostics** ($\hat{R}$, ESS) to verify MCMC sampler health.
+- **Time-series plots** showing how each city's baseline price and distance sensitivity evolved from August 2023 to June 2024.
+- **Model comparison table** (WAIC / LOO-CV) across the three modeling stages, demonstrating the empirical value of incorporating temporal dynamics.
