@@ -80,7 +80,7 @@ Model comparison will be conducted using **WAIC / LOO-CV** (via ArviZ), allowing
 
 ##  Dataset Information
 
-- **Source:** [Apartment Prices in Poland (Kaggle)](https://www.kaggle.com/datasets/mlenkin/apartment-prices-in-poland)
+- **Source:** [Apartment Prices in Poland (Kaggle)](https://www.kaggle.com/datasets/krzysztofjamroz/apartment-prices-in-poland)
 - **Time Span:** August 2023 – June 2024 (11 monthly snapshots, providing $T = 11$ time periods)
 - **Key Features:** `city`, `squareMeters`, `buildYear`, `centreDistance`, `poiCount` (OpenStreetMap POI data)
 - **Temporal Structure:** Each monthly CSV is treated as a cross-sectional snapshot at time $t$, enabling the construction of a panel dataset indexed by $(city, month)$.
