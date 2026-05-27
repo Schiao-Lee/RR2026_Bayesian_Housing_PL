@@ -46,19 +46,23 @@ jobs:
         run: |
           OUT="bayesian-housing-pl-${{ steps.tag.outputs.name }}.pdf"
 
-          # --resource-path lets pandoc find ../notebooks/figures/* referenced
-          # from reports/02_eda_findings.md, plus notebooks/figures/* referenced
-          # from README.md.
+          # Strip markdown image references (![alt](url)) — the SVG badges at the
+          # top of README would otherwise require texlive-latex-extra for svg.sty.
+          # Images add no value in a PDF deliverable; the Pages site is the place
+          # for visual artifacts.
+          sed 's/!\[[^]]*\]([^)]*)//g' README.md > _readme_for_pdf.md
+
+          # reports/02_eda_findings.md is image-heavy and image paths use ../
+          # which pandoc cannot resolve against a search path. The EDA figures
+          # live on the Pages site; the PDF focuses on the modeling story.
           pandoc \
-            README.md \
-            reports/02_eda_findings.md \
+            _readme_for_pdf.md \
             reports/03_stage1_pooled_summary.md \
             reports/04_stage2_hierarchical_summary.md \
             reports/05_stage3_tvp_summary.md \
             reports/06_model_comparison.md \
             --pdf-engine=xelatex \
             --toc --toc-depth=2 \
-            --resource-path=.:reports:notebooks/figures \
             -V mainfont="DejaVu Serif" \
             -V monofont="DejaVu Sans Mono" \
             -V geometry:margin=1in \
