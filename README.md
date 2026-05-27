@@ -1,5 +1,7 @@
 # Reproducible Bayesian Hierarchical Time-Varying Analysis of Apartment Prices in Poland 🇵🇱
 
+[![CI](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/ci.yml/badge.svg)](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/ci.yml)
+
 **Courses:**  
 - Reproducible Research UW - 2026 (dr Jakub Michańków)   
 
@@ -122,7 +124,15 @@ Ensure you have your Kaggle API credentials (`kaggle.json`) configured. Run the 
 python src/data_prep/01_download_and_merge.py
 ```
 
-### 3. Model Estimation
+### 3. Exploratory Data Analysis
+
+```bash
+python src/analysis/02_eda.py
+# or open the notebook
+jupyter notebook notebooks/02_eda.ipynb
+```
+
+### 4. Model Estimation
 
 ```bash
 # Stage 1: Pooled baseline
@@ -135,7 +145,7 @@ python src/models/02_hierarchical_bhm.py
 python src/models/03_hierarchical_tvp.py
 ```
 
-### 4. Model Comparison & Diagnostics
+### 5. Model Comparison & Diagnostics
 
 ```bash
 # WAIC / LOO-CV comparison, trace plots, posterior summaries
@@ -144,9 +154,16 @@ python src/analysis/model_comparison.py
 
 ---
 
-##  Expected Outputs
+##  Results
 
-- **Posterior summaries** of time-varying intercepts $\alpha_{c,t}$ and slopes $\beta_{c,t}$ for each city and month.
-- **Trace plots and convergence diagnostics** ($\hat{R}$, ESS) to verify MCMC sampler health.
-- **Time-series plots** showing how each city's baseline price and distance sensitivity evolved from August 2023 to June 2024.
-- **Model comparison table** (WAIC / LOO-CV) across the three modeling stages, demonstrating the empirical value of incorporating temporal dynamics.
+| Output | Path |
+| :--- | :--- |
+| EDA findings (priors, feature selection) | [`reports/02_eda_findings.md`](reports/02_eda_findings.md) |
+| Stage 1 — Pooled baseline | [`reports/03_stage1_pooled_summary.md`](reports/03_stage1_pooled_summary.md) |
+| Stage 2 — Hierarchical BHM | [`reports/04_stage2_hierarchical_summary.md`](reports/04_stage2_hierarchical_summary.md) |
+| Stage 3 — TVP (state-space) | [`reports/05_stage3_tvp_summary.md`](reports/05_stage3_tvp_summary.md) |
+| Model comparison (LOO-CV / WAIC) | [`reports/06_model_comparison.md`](reports/06_model_comparison.md) |
+| City-specific time-varying intercepts plot | [`notebooks/figures/stage3_city_intercept_trajectories.png`](notebooks/figures/stage3_city_intercept_trajectories.png) |
+| City-specific time-varying distance slopes plot | [`notebooks/figures/stage3_city_slope_trajectories.png`](notebooks/figures/stage3_city_slope_trajectories.png) |
+
+**Headline:** Stage 3 (TVP) wins LOO-CV with **98.3% stacking weight**; elpd gains are **+18,768 (Stage 1 → 2)** and **+2,302 (Stage 2 → 3)** on the common 39k-row subsample. Both hierarchy and time variation pay their way under cross-validation. See `reports/06_model_comparison.md` for the full table.
