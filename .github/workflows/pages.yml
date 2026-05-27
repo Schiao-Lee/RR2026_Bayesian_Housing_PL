@@ -23,8 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install pandoc + nbconvert
+        run: |
+          sudo apt-get update && sudo apt-get install -y pandoc
+          pip install --quiet nbconvert
 
       - name: Build static site
         run: |
@@ -32,6 +38,14 @@ jobs:
 
           # Copy figures so relative paths in reports/notebooks resolve.
           cp -r notebooks/figures/* _site/notebooks/figures/
+
+          # Render the EDA notebook to a standalone HTML page. We render the
+          # committed cell outputs as-is (no kernel execution in CD) — the
+          # repo's commit hygiene is that authors re-run before pushing.
+          jupyter nbconvert notebooks/02_eda.ipynb \
+            --to html \
+            --output-dir _site/notebooks \
+            --output 02_eda.html
 
           # Minimal GitHub-like stylesheet shared across all pages.
           cat > _site/style.css <<'CSS'

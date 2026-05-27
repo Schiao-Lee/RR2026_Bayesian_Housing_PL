@@ -163,6 +163,7 @@ python src/analysis/model_comparison.py
 | Output | Path |
 | :--- | :--- |
 | EDA findings (priors, feature selection) | [`reports/02_eda_findings.md`](reports/02_eda_findings.md) |
+| EDA notebook (auto-rendered each main merge) | [`notebooks/02_eda.html`](https://schiao-lee.github.io/RR2026_Bayesian_Housing_PL/notebooks/02_eda.html) |
 | Stage 1 — Pooled baseline | [`reports/03_stage1_pooled_summary.md`](reports/03_stage1_pooled_summary.md) |
 | Stage 2 — Hierarchical BHM | [`reports/04_stage2_hierarchical_summary.md`](reports/04_stage2_hierarchical_summary.md) |
 | Stage 3 — TVP (state-space) | [`reports/05_stage3_tvp_summary.md`](reports/05_stage3_tvp_summary.md) |
@@ -171,3 +172,14 @@ python src/analysis/model_comparison.py
 | City-specific time-varying distance slopes plot | [`notebooks/figures/stage3_city_slope_trajectories.png`](notebooks/figures/stage3_city_slope_trajectories.png) |
 
 **Headline:** Stage 3 (TVP) wins LOO-CV with **98.3% stacking weight**; elpd gains are **+18,768 (Stage 1 → 2)** and **+2,302 (Stage 2 → 3)** on the common 39k-row subsample. Both hierarchy and time variation pay their way under cross-validation. See `reports/06_model_comparison.md` for the full table.
+
+### Publishing a PDF snapshot
+
+Tagging a commit with a `v*` tag triggers `.github/workflows/release.yml`, which builds a combined PDF (README + every report) via pandoc/xelatex and attaches it to a GitHub Release for that tag:
+
+```bash
+git tag v1.0-submission
+git push origin v1.0-submission
+# A few minutes later the PDF appears at:
+# https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/releases/tag/v1.0-submission
+```
