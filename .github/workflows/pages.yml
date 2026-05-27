@@ -1,0 +1,81 @@
+name: Deploy reports to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Build static site
+        run: |
+          mkdir -p _site/reports _site/notebooks/figures
+
+          # Copy figures so relative paths in reports/notebooks resolve.
+          cp -r notebooks/figures/* _site/notebooks/figures/
+
+          # Minimal GitHub-like stylesheet shared across all pages.
+          cat > _site/style.css <<'CSS'
+          body { max-width: 900px; margin: 2em auto; padding: 0 1.2em;
+                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                              Helvetica, Arial, sans-serif;
+                 line-height: 1.6; color: #24292f; }
+          h1, h2, h3 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+          pre, code { background: #f6f8fa; border-radius: 6px;
+                      font-family: "SF Mono", Menlo, Consolas, monospace; }
+          pre { padding: 1em; overflow-x: auto; font-size: 0.85em; }
+          code { padding: 0.15em 0.4em; font-size: 0.9em; }
+          pre code { padding: 0; background: none; }
+          table { border-collapse: collapse; margin: 1em 0; }
+          th, td { border: 1px solid #d0d7de; padding: 0.4em 0.8em; }
+          th { background: #f6f8fa; }
+          img { max-width: 100%; }
+          a { color: #0969da; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          blockquote { border-left: 4px solid #d0d7de; margin: 1em 0;
+                       padding: 0 1em; color: #57606a; }
+          CSS
+
+          # Render every report markdown to HTML preserving the reports/ path.
+          for md in reports/*.md; do
+            base=$(basename "$md" .md)
+            pandoc "$md" \
+              --standalone --mathjax \
+              --css=/RR2026_Bayesian_Housing_PL/style.css \
+              --metadata title="$base" \
+              -o "_site/reports/${base}.html"
+          done
+
+          # Render README as the site root; rewrite intra-repo .md links to .html.
+          pandoc README.md \
+            --standalone --mathjax \
+            --css=/RR2026_Bayesian_Housing_PL/style.css \
+            --metadata title="Bayesian Housing PL — RR2026" \
+            -o _site/index.html
+          sed -i 's|href="\([^"]*\)\.md"|href="\1.html"|g' _site/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
