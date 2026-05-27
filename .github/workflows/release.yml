@@ -1,0 +1,81 @@
+name: Release PDF
+
+# Triggers on annotated/lightweight tags matching v* (e.g. v1.0, v1.0-submission).
+# Combines the README and every reports/*.md into a single PDF via pandoc + xelatex,
+# then attaches it as an asset on a new GitHub Release for that tag.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name to attach the PDF to (must already exist)"
+        required: true
+        type: string
+
+permissions:
+  contents: write  # required to create the Release and upload the asset
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc + xelatex + Unicode-capable fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pandoc \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            fonts-dejavu-core
+
+      - name: Resolve tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=${{ inputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build combined PDF
+        run: |
+          OUT="bayesian-housing-pl-${{ steps.tag.outputs.name }}.pdf"
+
+          # --resource-path lets pandoc find ../notebooks/figures/* referenced
+          # from reports/02_eda_findings.md, plus notebooks/figures/* referenced
+          # from README.md.
+          pandoc \
+            README.md \
+            reports/02_eda_findings.md \
+            reports/03_stage1_pooled_summary.md \
+            reports/04_stage2_hierarchical_summary.md \
+            reports/05_stage3_tvp_summary.md \
+            reports/06_model_comparison.md \
+            --pdf-engine=xelatex \
+            --toc --toc-depth=2 \
+            --resource-path=.:reports:notebooks/figures \
+            -V mainfont="DejaVu Serif" \
+            -V monofont="DejaVu Sans Mono" \
+            -V geometry:margin=1in \
+            -V colorlinks=true \
+            -V linkcolor=blue \
+            -V urlcolor=blue \
+            --metadata title="Bayesian Housing PL — RR2026" \
+            --metadata subtitle="${{ steps.tag.outputs.name }}" \
+            -o "$OUT"
+
+          ls -lh "$OUT"
+          echo "PDF=$OUT" >> "$GITHUB_ENV"
+
+      - name: Create / update GitHub Release with PDF
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.name }}
+          generate_release_notes: true
+          files: ${{ env.PDF }}
