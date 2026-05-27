@@ -211,6 +211,9 @@ data/raw/*.csv
 data/raw/*.zip
 data/processed/*.csv
 
+# Ignore MCMC traces (re-generatable from src/models scripts; often > 100MB)
+data/traces/
+
 # Ignore Kaggle credentials just in case (though we used environment variables)
 kaggle.json
 .kaggle/
