@@ -1,6 +1,9 @@
 # Reproducible Bayesian Hierarchical Time-Varying Analysis of Apartment Prices in Poland 🇵🇱
 
 [![CI](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/ci.yml/badge.svg)](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/ci.yml)
+[![Pages](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/pages.yml/badge.svg)](https://github.com/Schiao-Lee/RR2026_Bayesian_Housing_PL/actions/workflows/pages.yml)
+
+📄 **Read the rendered reports without cloning:** <https://schiao-lee.github.io/RR2026_Bayesian_Housing_PL/>
 
 **Courses:**  
 - Reproducible Research UW - 2026 (dr Jakub Michańków)   
