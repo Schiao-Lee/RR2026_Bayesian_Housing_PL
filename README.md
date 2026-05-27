@@ -9,12 +9,13 @@
 
 ##  Team Members
 
+Roles below are primary, not exclusive — members may contribute across areas as the work demands.
+
 | Name | Student ID | Role / Responsibilities | GitHub Profile |
 | :--- | :--- | :--- | :--- |
-| Levente Laszlo Szabo | 488761 | **Role name:** | [@LeventeSzaboUW](https://github.com/LeventeSzaboUW) |
-| Loveness Tafadzwa Mudyiwa | 478559 | **Role name:** | [@username](https://github.com/) |
-| Xiao Li | 473533 | **Role name:** | [@Schiao-Lee](https://github.com/Schiao-Lee) |
-| Szymon Grabowski | 473037 | **Role name:** | [@sgrabowski8](https://github.com/sgrabowski8) |
+| Levente Laszlo Szabo | 488761 | Data pipeline, EDA, visualizations | [@LeventeSzaboUW](https://github.com/LeventeSzaboUW) |
+| Xiao Li | 473533 | Modeling (Pooled → BHM → TVP state-space) | [@Schiao-Lee](https://github.com/Schiao-Lee) |
+| Szymon Grabowski | 473037 | Report, documentation | [@sgrabowski8](https://github.com/sgrabowski8) |
 
 ---
 
