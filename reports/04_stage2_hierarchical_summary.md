@@ -45,7 +45,7 @@ Each value is the city-specific deviation from the population intercept (units: 
 - Min ESS-bulk (overall): **288**
 - Divergences after tuning: **3** / 2000 draws (0.15%)
 
-**Interpretation.** The borderline R-hat is concentrated on the population `Intercept`, which is weakly identified against the city random offsets (a well-known additive identifiability issue in hierarchical models). Slope parameters — the inferential targets — all show R-hat ≤ 1.0056 and ESS-bulk ≥ 1474, so the substantive conclusions (sign flip on `centreDistance_z`, city ordering) are robust. A cleaner diagnostic pass would re-run with 4 chains and `target_accept=0.95` at the cost of ~2× wall time.
+**Interpretation.** Any borderline R-hat is concentrated on the population `Intercept`, which is weakly identified against the city random offsets (a well-known additive identifiability issue in hierarchical models). Slope parameters — the inferential targets — all show R-hat ≤ 1.0056 and ESS-bulk ≥ 1471, so the substantive conclusions (sign flip on `centreDistance_z`, city ordering) are robust. A cleaner diagnostic pass would re-run with 4 chains and `target_accept=0.95` at the cost of ~2× wall time.
 
 ## Comparison with Stage 1
 
