@@ -27,6 +27,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "master_sales_dataset.csv"
 REPORT_PATH = PROJECT_ROOT / "reports" / "03_stage1_pooled_summary.md"
+TRACE_PATH = PROJECT_ROOT / "data" / "traces" / "stage1_pooled.nc"
 
 FEATURES = ["squareMeters", "centreDistance", "poiCount"]
 
@@ -49,6 +50,7 @@ def fit_model(df: pd.DataFrame) -> az.InferenceData:
         target_accept=0.9,
         random_seed=42,
         progressbar=False,
+        idata_kwargs={"log_likelihood": True},
     )
     return idata
 
@@ -89,6 +91,9 @@ def main() -> None:
     idata = fit_model(df)
     write_report(idata, n_obs=len(df))
     print(f"Saved report to: {REPORT_PATH}")
+    TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    idata.to_netcdf(TRACE_PATH)
+    print(f"Saved trace to: {TRACE_PATH}")
 
 
 if __name__ == "__main__":

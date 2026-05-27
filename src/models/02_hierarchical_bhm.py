@@ -35,6 +35,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "master_sales_dataset.csv"
 REPORT_PATH = PROJECT_ROOT / "reports" / "04_stage2_hierarchical_summary.md"
+TRACE_PATH = PROJECT_ROOT / "data" / "traces" / "stage2_hierarchical.nc"
 
 FEATURES = ["squareMeters", "centreDistance", "poiCount"]
 SAMPLE_FRAC = 0.25  # stratified by city; ~48k rows
@@ -71,6 +72,7 @@ def fit_model(df: pd.DataFrame) -> az.InferenceData:
         target_accept=0.9,
         random_seed=42,
         progressbar=False,
+        idata_kwargs={"log_likelihood": True},
     )
     return idata
 
@@ -182,6 +184,9 @@ def main() -> None:
     idata = fit_model(df)
     write_report(idata, df)
     print(f"Saved report to: {REPORT_PATH}")
+    TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    idata.to_netcdf(TRACE_PATH)
+    print(f"Saved trace to: {TRACE_PATH}")
 
 
 if __name__ == "__main__":
